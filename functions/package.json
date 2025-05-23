@@ -1,0 +1,35 @@
+{
+  "name": "backend-functions",
+  "private": true,
+  "main": "./dist/index.js",
+  "type": "commonjs",
+  "scripts": {
+    "lint": "npx biome lint src ",
+    "format": "npx biome format --write src",
+    "build": "tsc && tsc-alias",
+    "build:watch": "tsc --watch",
+    "shell": "npm run build && firebase functions:shell",
+    "start": "npm run shell",
+    "deploy:dev": "firebase deploy --only functions --config ../firebase.json",
+    "deploy:prod": "firebase deploy --only functions --config ../firebase.prod.json"
+  },
+  "engines": {
+    "node": "20"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "firebase-admin": "^13.0.1",
+    "firebase-functions": "^6.3.2",
+    "openai": "^4.85.4",
+    "uuid": "^11.0.3"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/json-schema": "^7.0.15",
+    "@types/node": "^22.10.2",
+    "ts-node": "^10.9.2",
+    "tsc-alias": "^1.8.10",
+    "typescript": "^5.7.2"
+  },
+  "license": "UNLICENSED"
+}

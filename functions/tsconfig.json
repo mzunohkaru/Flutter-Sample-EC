@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "ES2023",
+    "module": "CommonJS",
+    "lib": ["ES2023"],
+    "types": ["node"],
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "sourceMap": false,
+    "moduleResolution": "node10",
+    "removeComments": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "noUnusedParameters": true,
+    "noUnusedLocals": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true,
+  },
+  "compileOnSave": true,
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "lib"]
+}
