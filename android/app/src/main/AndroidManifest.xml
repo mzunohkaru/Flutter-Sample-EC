@@ -2,7 +2,10 @@
     <application
         android:label="ec_sample"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:usesCleartextTraffic="true">
+        <!-- Note: For production, consider using a network security configuration
+             instead of usesCleartextTraffic="true" to allow traffic only to specific domains. -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -25,6 +28,15 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <!-- Stripe Activities -->
+        <activity
+            android:name="com.stripe.android.payments.StripePaymentLauncherActivity"
+            android:exported="false"
+            android:theme="@style/StripeDefaultTheme" />
+        <activity
+            android:name="com.stripe.android.payments.StripeBrowserLauncherActivity"
+            android:exported="false"
+            android:theme="@style/StripeDefaultTheme" />
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data
