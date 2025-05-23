@@ -1,5 +1,84 @@
 import 'package:flutter/material.dart';
 
+// 商品モデルクラス
+class Product {
+  final String id;
+  final String name;
+  final int price;
+  final String imageUrl;
+
+  Product({
+    required this.id,
+    required this.name,
+    required this.price,
+    required this.imageUrl,
+  });
+}
+
+// モック商品データ
+final List<Product> mockProducts = [
+  Product(
+    id: '1',
+    name: 'スニーカー',
+    price: 5980,
+    imageUrl: 'https://picsum.photos/id/21/200/200',
+  ),
+  Product(
+    id: '2',
+    name: 'ヘッドホン',
+    price: 12800,
+    imageUrl: 'https://picsum.photos/id/27/200/200',
+  ),
+  Product(
+    id: '3',
+    name: '腕時計',
+    price: 32000,
+    imageUrl: 'https://picsum.photos/id/111/200/200',
+  ),
+  Product(
+    id: '4',
+    name: 'バックパック',
+    price: 8500,
+    imageUrl: 'https://picsum.photos/id/83/200/200',
+  ),
+  Product(
+    id: '5',
+    name: 'サングラス',
+    price: 6200,
+    imageUrl: 'https://picsum.photos/id/20/200/200',
+  ),
+  Product(
+    id: '6',
+    name: 'スマートウォッチ',
+    price: 24800,
+    imageUrl: 'https://picsum.photos/id/96/200/200',
+  ),
+  Product(
+    id: '7',
+    name: 'ノートパソコン',
+    price: 89800,
+    imageUrl: 'https://picsum.photos/id/48/200/200',
+  ),
+  Product(
+    id: '8',
+    name: 'ワイヤレスイヤホン',
+    price: 15400,
+    imageUrl: 'https://picsum.photos/id/127/200/200',
+  ),
+  Product(
+    id: '9',
+    name: 'デジタルカメラ',
+    price: 42500,
+    imageUrl: 'https://picsum.photos/id/250/200/200',
+  ),
+  Product(
+    id: '10',
+    name: 'スマートフォン',
+    price: 78000,
+    imageUrl: 'https://picsum.photos/id/160/200/200',
+  ),
+];
+
 void main() {
   runApp(const MyApp());
 }
@@ -10,12 +89,339 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'EC Demo',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const Scaffold(),
+      home: const HomePage(),
+    );
+  }
+}
+
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  // 商品IDと個数を紐づけるマップ
+  final Map<String, int> _quantities = {};
+
+  // 個数を取得するメソッド（存在しない場合は0を返す）
+  int _getQuantity(String productId) {
+    return _quantities[productId] ?? 0;
+  }
+
+  // 個数を増やすメソッド
+  void _incrementQuantity(String productId) {
+    setState(() {
+      _quantities[productId] = _getQuantity(productId) + 1;
+    });
+  }
+
+  // 個数を減らすメソッド
+  void _decrementQuantity(String productId) {
+    setState(() {
+      if (_getQuantity(productId) > 0) {
+        _quantities[productId] = _getQuantity(productId) - 1;
+      }
+    });
+  }
+
+  // カートに入っている商品と数量を元に合計金額を計算するメソッド
+  int _calculateTotalPrice() {
+    int total = 0;
+    _quantities.forEach((productId, quantity) {
+      if (quantity > 0) {
+        final product = mockProducts.firstWhere((p) => p.id == productId);
+        total += product.price * quantity;
+      }
+    });
+    return total;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // カートに商品があるか確認
+    bool hasItemsInCart = _quantities.values.any((quantity) => quantity > 0);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('商品リスト'),
+      ),
+      body: ListView.builder(
+        itemCount: mockProducts.length,
+        itemBuilder: (BuildContext context, int index) {
+          final product = mockProducts[index];
+          return Card(
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  // 商品画像
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      product.imageUrl,
+                      width: 80,
+                      height: 80,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  // 商品情報
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          product.name,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '¥${product.price.toString()}',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.red,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        // 個数操作ボタン
+                        Row(
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.remove_circle_outline),
+                              onPressed: _getQuantity(product.id) > 0
+                                  ? () => _decrementQuantity(product.id)
+                                  : null,
+                              style: ButtonStyle(
+                                backgroundColor: MaterialStatePropertyAll(
+                                  _getQuantity(product.id) > 0
+                                      ? Colors.grey.shade200
+                                      : Colors.grey.shade100,
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 40,
+                              child: Text(
+                                _getQuantity(product.id).toString(),
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.add_circle_outline),
+                              onPressed: () => _incrementQuantity(product.id),
+                              style: ButtonStyle(
+                                backgroundColor: MaterialStatePropertyAll(
+                                  Colors.grey.shade200,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  // 詳細ボタン
+                  IconButton(
+                    icon: const Icon(Icons.arrow_forward_ios),
+                    onPressed: () {
+                      // 詳細画面へ遷移する処理を追加予定
+                    },
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+      bottomNavigationBar: hasItemsInCart
+          ? BottomAppBar(
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: ElevatedButton(
+                  onPressed: () {
+                    // 選択された商品と数量を取得
+                    final selectedProducts = <String, int>{};
+                    _quantities.forEach((productId, quantity) {
+                      if (quantity > 0) {
+                        selectedProducts[productId] = quantity;
+                      }
+                    });
+
+                    // 決済画面へ遷移
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CheckoutPage(
+                          selectedProducts: selectedProducts,
+                          totalPrice: _calculateTotalPrice(),
+                        ),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepPurple,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  child: Text('購入する (¥${_calculateTotalPrice()})'),
+                ),
+              ),
+            )
+          : null,
+    );
+  }
+}
+
+// 決済画面
+class CheckoutPage extends StatelessWidget {
+  final Map<String, int> selectedProducts;
+  final int totalPrice;
+
+  const CheckoutPage({
+    Key? key,
+    required this.selectedProducts,
+    required this.totalPrice,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('決済'),
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                // 選択された商品一覧
+                const Text(
+                  '注文内容',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                ...selectedProducts.entries.map((entry) {
+                  final productId = entry.key;
+                  final quantity = entry.value;
+                  final product =
+                      mockProducts.firstWhere((p) => p.id == productId);
+
+                  return ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: Image.network(
+                        product.imageUrl,
+                        width: 50,
+                        height: 50,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    title: Text(product.name),
+                    subtitle: Text('¥${product.price} × $quantity'),
+                    trailing: Text(
+                      '¥${product.price * quantity}',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  );
+                }).toList(),
+
+                const Divider(height: 32),
+
+                // 合計金額
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      '合計',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      '¥$totalPrice',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red,
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 24),
+
+                // 支払い方法選択やお届け先情報など
+                const Text(
+                  '支払い方法',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Card(
+                  child: ListTile(
+                    leading: Icon(Icons.credit_card),
+                    title: Text('クレジットカード'),
+                    trailing: Icon(Icons.check_circle, color: Colors.green),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // 決済ボタン
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: ElevatedButton(
+              onPressed: () {
+                // 決済処理（実際には決済サービスとの連携などが入る）
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('決済が完了しました！'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+
+                // ホーム画面に戻る
+                Navigator.popUntil(context, (route) => route.isFirst);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.deepPurple,
+                foregroundColor: Colors.white,
+                minimumSize: const Size(double.infinity, 50),
+              ),
+              child: const Text('決済する', style: TextStyle(fontSize: 16)),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
