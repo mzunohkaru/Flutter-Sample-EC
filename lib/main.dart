@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_stripe/flutter_stripe.dart' hide Card;
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 // 商品モデルクラス
 class Product {
@@ -291,7 +294,7 @@ class _HomePageState extends State<HomePage> {
 }
 
 // 決済画面
-class CheckoutPage extends StatelessWidget {
+class CheckoutPage extends StatefulWidget {
   final Map<String, int> selectedProducts;
   final int totalPrice;
 
@@ -300,6 +303,94 @@ class CheckoutPage extends StatelessWidget {
     required this.selectedProducts,
     required this.totalPrice,
   }) : super(key: key);
+
+  @override
+  State<CheckoutPage> createState() => _CheckoutPageState();
+}
+
+class _CheckoutPageState extends State<CheckoutPage> {
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // TODO: XXXAPIKEY を実際のStripe公開可能キーに置き換えてください。
+    // 本番環境では、このようなキーをハードコードせず、環境変数など安全な方法で管理してください。
+    Stripe.publishableKey = 'XXXAPIKEY';
+    Stripe.instance.applySettings();
+  }
+
+  Future<void> _handlePayment() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // 1. Cloud Functionを呼び出してPaymentIntentを作成
+      // TODO: YOUR_FIREBASE_PROJECT_ID を実際のプロジェクトIDに、
+      // また必要であれば YOUR_FIREBASE_REGION を適切なリージョンに置き換えてください。
+      final url = Uri.parse(
+          'https://us-central1-YOUR_PROJECT_ID.cloudfunctions.net/createPaymentIntent');
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'amount': widget.totalPrice,
+          'currency': 'jpy',
+        }),
+      );
+
+      if (response.statusCode != 200) {
+        final errorData = json.decode(response.body);
+        throw Exception(
+            'Cloud Function Error: ${errorData['error']?['message'] ?? response.body}');
+      }
+
+      final Map<String, dynamic> paymentIntentData = json.decode(response.body);
+      final clientSecret = paymentIntentData['clientSecret'];
+
+      if (clientSecret == null) {
+        throw Exception('Client secret not found in response.');
+      }
+
+      // 2. Stripeで支払いを実行
+      // TODO: 本番アプリでは、PaymentMethodParams.cardFromMethodIdやCardFieldを使用して
+      // カード情報を安全に収集・処理することを推奨します。
+      // BillingDetailsも適切に設定してください。
+      await Stripe.instance.confirmPayment(
+        paymentIntentClientSecret: clientSecret,
+        data: const PaymentMethodParams.card(
+          paymentMethodData: PaymentMethodData(
+            billingDetails: BillingDetails(), // 必要に応じて詳細情報を追加
+          ),
+        ),
+      );
+
+      // 3. 成功メッセージを表示してホーム画面に戻る
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('決済が完了しました！'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      Navigator.popUntil(context, (route) => route.isFirst);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('決済に失敗しました: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -322,7 +413,7 @@ class CheckoutPage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
-                ...selectedProducts.entries.map((entry) {
+                ...widget.selectedProducts.entries.map((entry) {
                   final productId = entry.key;
                   final quantity = entry.value;
                   final product =
@@ -364,7 +455,7 @@ class CheckoutPage extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      '¥$totalPrice',
+                      '¥${widget.totalPrice}',
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -385,11 +476,12 @@ class CheckoutPage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
+                // TODO: ここにCardFieldを配置するなどして、実際のカード情報を入力できるようにする
                 const Card(
                   child: ListTile(
                     leading: Icon(Icons.credit_card),
                     title: Text('クレジットカード'),
-                    trailing: Icon(Icons.check_circle, color: Colors.green),
+                    // trailing: Icon(Icons.check_circle, color: Colors.green), // Stripe UIが処理
                   ),
                 ),
               ],
@@ -400,24 +492,16 @@ class CheckoutPage extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(16),
             child: ElevatedButton(
-              onPressed: () {
-                // 決済処理（実際には決済サービスとの連携などが入る）
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('決済が完了しました！'),
-                    backgroundColor: Colors.green,
-                  ),
-                );
-
-                // ホーム画面に戻る
-                Navigator.popUntil(context, (route) => route.isFirst);
-              },
+              onPressed: _isLoading ? null : _handlePayment,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.deepPurple,
                 foregroundColor: Colors.white,
                 minimumSize: const Size(double.infinity, 50),
+                disabledBackgroundColor: Colors.grey,
               ),
-              child: const Text('決済する', style: TextStyle(fontSize: 16)),
+              child: _isLoading
+                  ? const CircularProgressIndicator(color: Colors.white)
+                  : const Text('決済する', style: TextStyle(fontSize: 16)),
             ),
           ),
         ],
