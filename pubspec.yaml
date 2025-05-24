@@ -14,14 +14,20 @@ dependencies:
 
   flutter_stripe: ^11.5.0
   http: ^1.4.0
+  flutter_riverpod: any
+  freezed_annotation: any
+  json_serializable: any
+  hive: any
+  hive_flutter: any
+  hive_generator: any
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  build_runner: any
   # Lint
   flutter_lints: ^5.0.0
-  custom_lint: ^0.7.3
-  riverpod_lint: ^2.6.4
+  custom_lint: ^0.7.0
   very_good_analysis: ^7.0.0
 
 flutter:
