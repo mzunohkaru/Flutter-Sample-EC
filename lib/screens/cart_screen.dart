@@ -33,14 +33,16 @@ class CartScreen extends ConsumerWidget {
                       final item = cartItems[index];
                       return ListTile(
                         title: Text(item.name),
-                        subtitle: Text('Price: \$${item.price.toStringAsFixed(2)} - Quantity: ${item.quantity}'),
+                        subtitle: Text(
+                            'Price: \$${item.price.toStringAsFixed(2)} - Quantity: ${item.quantity}'),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             IconButton(
                               icon: const Icon(Icons.remove_circle_outline),
                               onPressed: () {
-                                ref.read(cartProvider.notifier).updateQuantity(item.productId, item.quantity - 1);
+                                ref.read(cartProvider.notifier).updateQuantity(
+                                    item.productId, item.quantity - 1);
                               },
                             ),
                             Text('${item.quantity}'),
@@ -49,13 +51,16 @@ class CartScreen extends ConsumerWidget {
                               onPressed: () {
                                 // For simplicity, adding one more of the same item.
                                 // In a real app, you might have a different way to add quantity or distinct items.
-                                ref.read(cartProvider.notifier).updateQuantity(item.productId, item.quantity + 1);
+                                ref.read(cartProvider.notifier).updateQuantity(
+                                    item.productId, item.quantity + 1);
                               },
                             ),
                             IconButton(
                               icon: const Icon(Icons.delete),
                               onPressed: () {
-                                ref.read(cartProvider.notifier).removeItem(item.productId);
+                                ref
+                                    .read(cartProvider.notifier)
+                                    .removeItem(item.productId);
                               },
                             ),
                           ],

@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart'; // Added Riverpod
-import 'package:flutter_stripe/flutter_stripe.dart' hide Card;
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'src/models/cart_item.dart'; // For CartItemAdapter
-import 'src/services/cart_service.dart'; // For opening the cart box
-import 'src/screens/home_screen.dart';
-import 'src/screens/account_screen.dart';
-import 'src/screens/cart_screen.dart';
-import 'src/screens/menu_screen.dart';
-import 'src/screens/settings_screen.dart';
+import 'models/cart_item.dart'; // For CartItemAdapter
+import 'services/cart_service.dart'; // For opening the cart box
+import 'screens/home_screen.dart';
+import 'screens/account_screen.dart';
+import 'screens/cart_screen.dart';
+import 'screens/menu_screen.dart';
+import 'screens/settings_screen.dart';
 // import 'package:path_provider/path_provider.dart' as path_provider; // If needed for specific Hive setup
 
 // 商品モデルクラス
@@ -92,7 +89,8 @@ final List<Product> mockProducts = [
   ),
 ];
 
-void main() async { // Make main async
+void main() async {
+  // Make main async
   WidgetsFlutterBinding.ensureInitialized(); // Ensure bindings are initialized
 
   // Initialize Hive
@@ -108,7 +106,8 @@ void main() async { // Make main async
   await CartService().openCartBox();
 
   runApp(
-    const ProviderScope( // Wrap with ProviderScope
+    const ProviderScope(
+      // Wrap with ProviderScope
       child: MyApp(),
     ),
   );
@@ -122,8 +121,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter App', // Or your app's title
       theme: ThemeData(
-        primarySwatch: Colors.blue,
-        //brightness: Brightness.dark, // Example: Dark theme
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
       ),
       home: const MainScreen(), // Set MainScreen as home
     );
@@ -140,12 +139,12 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0; // Default to Home screen
 
-  static const List<Widget> _widgetOptions = <Widget>[
+  static final List<Widget> _widgetOptions = <Widget>[
     HomeScreen(),
-    AccountScreen(),
-    CartScreen(),
-    MenuScreen(),
-    SettingsScreen(),
+    const AccountScreen(),
+    const CartScreen(),
+    const MenuScreen(),
+    const SettingsScreen(),
   ];
 
   void _onItemTapped(int index) {

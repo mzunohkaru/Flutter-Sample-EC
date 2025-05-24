@@ -1,6 +1,6 @@
 name: ec_sample
 description: "A new Flutter project."
-publish_to: 'none'
+publish_to: "none"
 version: 1.0.0+1
 
 environment:
@@ -16,22 +16,26 @@ dependencies:
   http: ^1.4.0
   flutter_riverpod: any
   freezed_annotation: any
+  flutter_hooks: ^0.21.2
+
   json_serializable: any
   hive: any
   hive_flutter: any
-  hive_generator: any
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   build_runner: any
+  freezed: any
+  hive_generator: any
+  json_annotation: any
+
   # Lint
   flutter_lints: ^5.0.0
   custom_lint: ^0.7.0
   very_good_analysis: ^7.0.0
 
 flutter:
-
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:

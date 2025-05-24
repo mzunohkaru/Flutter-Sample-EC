@@ -14,5 +14,6 @@ class CartItem with _$CartItem {
     @HiveField(3) required int quantity,
   }) = _CartItem;
 
-  factory CartItem.fromJson(Map<String, dynamic> json) => _$CartItemFromJson(json);
+  factory CartItem.fromJson(Map<String, dynamic> json) =>
+      _$CartItemFromJson(json);
 }
